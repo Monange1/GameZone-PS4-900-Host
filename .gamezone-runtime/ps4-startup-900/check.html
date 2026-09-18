@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GameZone connection check</title>
+  <style>
+    body { background:#142034; color:white; font:26px sans-serif; margin:60px; }
+    h1 { color:#87e4b5; }
+    p { margin:22px 0; }
+  </style>
+</head>
+<body>
+  <h1>GameZone connection OK</h1>
+  <p>Your PS4 can open the setup server's web pages.</p>
+  <p>This check does not start GoldHEN.</p>
+  <p><a href="/start.html" style="color:#87e4b5;font-size:32px;">Open GameZone startup</a></p>
+  <p>For this check, leave Enable JavaScript unchecked in browser settings.</p>
+  <p id="cache">Checking offline cache support...</p>
+  <p id="files">Checking setup file access...</p>
+  <script>
+    document.getElementById('cache').textContent = window.applicationCache
+      ? 'Offline cache API is available.' : 'Offline cache API is unavailable.';
+    var req = new XMLHttpRequest();
+    req.open('GET', 'index.html?connection-check=1', true);
+    req.onload = function () {
+      document.getElementById('files').textContent = 'Setup page response: '
+        + req.status + ' / ' + req.getResponseHeader('Content-Type');
+    };
+    req.onerror = function () {
+      document.getElementById('files').textContent = 'Setup page request failed.';
+    };
+    req.send();
+  </script>
+</body>
+</html>

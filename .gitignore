@@ -1,0 +1,22 @@
+# Dependencies and generated builds
+**/node_modules/
+**/.next/
+**/dist/
+**/coverage/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Generated runtime state: the approved static startup package is tracked.
+.gamezone-runtime/installer-backups/
+.gamezone-runtime/managed-runtime-activations/
+.gamezone-runtime/maintenance-artifacts/
+
+# Logs and editor files
+*.log
+.DS_Store
+Thumbs.db

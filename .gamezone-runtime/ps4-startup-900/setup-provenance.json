@@ -1,0 +1,10 @@
+{
+  "firmware": "9.00",
+  "source_origin": "https://ps4idea.github.io/900/",
+  "goldhen_source_file": "goldhen.bin",
+  "goldhen_version": "2.4b18.10",
+  "goldhen_sha256": "c6329401d1810e16c84e6474ac30977dbdc951987c10cdb559370de7d59db0b0",
+  "goldhen_bytes": 290016,
+  "hardware_validated": false,
+  "note": "Binary version and official source must be verified separately; filename is not proof."
+}

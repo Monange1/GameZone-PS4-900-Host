@@ -1,0 +1,99 @@
+<!doctype html>
+<html manifest="gamezone-start.cache">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GameZone Hub · PS4 9.00</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin:0; min-height:100vh; overflow:hidden; color:#eef7ff; font:20px Arial,sans-serif; background:#070b18; }
+    .shell { min-height:100vh; padding:42px 56px; background:radial-gradient(circle at 18% 14%,#123b70 0,transparent 32%),radial-gradient(circle at 84% 82%,#431864 0,transparent 36%),linear-gradient(145deg,#080d1d,#10162b); }
+    .topline { display:flex; align-items:center; gap:14px; color:#7ddfff; font-size:18px; letter-spacing:2px; }
+    .mark { width:44px; height:44px; border:2px solid #35dffa; border-radius:12px; position:relative; box-shadow:0 0 18px #1cccf088; }
+    .mark:before { content:''; position:absolute; width:16px; height:16px; border:3px solid #9d61ff; border-radius:50%; left:11px; top:10px; }
+    .mark:after { content:''; position:absolute; width:6px; height:6px; background:#32e69a; border-radius:50%; right:6px; top:6px; }
+    main { max-width:920px; margin:72px auto 0; padding:48px 52px; border:1px solid #2a385d; border-radius:26px; background:rgba(12,18,37,.88); box-shadow:0 26px 70px #0008, inset 0 1px #ffffff12; }
+    h1 { margin:0 0 14px; font-size:42px; color:#fff; }
+    .sub { margin:0 0 42px; color:#9eb5d5; font-size:22px; }
+    .state { display:flex; align-items:center; gap:15px; padding:22px; border:1px solid #27365a; border-radius:16px; background:#0a1021; color:#c7d7ec; line-height:1.45; }
+    .pulse { width:13px; height:13px; flex:0 0 13px; border-radius:50%; background:#ffbf47; box-shadow:0 0 12px #ffbf47; }
+    .ready .pulse { background:#32e69a; box-shadow:0 0 12px #32e69a; }
+    button { display:block; width:100%; margin-top:28px; padding:22px 28px; border:0; border-radius:14px; color:#fff; font-size:25px; font-weight:bold; background:linear-gradient(100deg,#6650e8,#8a55ff); box-shadow:0 10px 30px #704cff55; }
+    button:disabled { background:#26314c; color:#7183a0; box-shadow:none; }
+    .foot { margin:30px 0 0; color:#7890b1; font-size:17px; text-align:center; }
+    #console { max-height:110px; overflow:hidden; margin:22px 0 0; color:#7e91ad; font:15px monospace; white-space:pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="topline"><span class="mark"></span><strong>GAMEZONE HUB</strong><span>·</span><span>PS4 STARTUP</span></div>
+    <main>
+      <h1>Ready and waiting for FC</h1>
+      <p class="sub">PS4 firmware 9.00 · GameZone managed GoldHEN 2.4b18.10</p>
+      <div class="state" id="state"><span class="pulse"></span><span id="status">Turn on Enable JavaScript in Browser Settings, then reload this page.</span></div>
+      <button id="start" disabled>Start GoldHEN</button>
+      <p class="foot">Use after a cold boot. Once GoldHEN starts, the installed GameZone tracker starts automatically.</p>
+      <pre id="console"></pre>
+    </main>
+  </div>
+  <script type="module">
+    const status = document.getElementById('status');
+    const button = document.getElementById('start');
+    const state = document.getElementById('state');
+    const cache = window.applicationCache;
+    const consoleOut = document.getElementById('console');
+    let started = false;
+    let ready = false;
+    function setStatus(message, isReady) {
+      status.textContent = message;
+      state.className = isReady ? 'state ready' : 'state';
+    }
+    function available() {
+      if (started) return;
+      ready = true;
+      setStatus('Offline startup files are ready. Start GoldHEN only if it is not already running.', true);
+      button.disabled = false;
+    }
+    if (!/PlayStation 4 9\.00/.test(navigator.userAgent)) {
+      setStatus('Open this setup on a PS4 running firmware 9.00.', false);
+    } else if (!cache) {
+      setStatus('Offline cache is unavailable. Leave this page open and report this message.', false);
+    } else {
+      setStatus('Preparing offline startup files…', false);
+      cache.addEventListener('progress', function (event) {
+        if (!started && event.lengthComputable) setStatus('Saving offline startup files: ' + Math.round(event.loaded * 100 / event.total) + '%', false);
+      });
+      cache.addEventListener('cached', available);
+      cache.addEventListener('noupdate', function () {
+        if (cache.status !== cache.UNCACHED && cache.status !== cache.OBSOLETE) available();
+      });
+      cache.addEventListener('updateready', function () {
+        ready = false; button.disabled = true;
+        setStatus('A new offline package was saved. Reload this page once before starting GoldHEN.', false);
+      });
+      cache.addEventListener('error', function () {
+        ready = false; button.disabled = true;
+        setStatus('Offline setup did not finish. Keep the Hub server open and report this message.', false);
+      });
+      if (cache.status === cache.IDLE) available();
+    }
+    button.onclick = async function () {
+      if (!ready || started) return;
+      started = true; button.disabled = true;
+      setStatus('Starting GoldHEN. Please wait…', false);
+      try {
+        const response = await fetch('payload.bin');
+        if (!response.ok) throw new Error('GoldHEN download failed: ' + response.status);
+        const binary = await response.arrayBuffer();
+        if (binary.byteLength !== 290016) throw new Error('Unexpected GoldHEN file size');
+        window.pld = new Uint32Array(binary);
+        await import('./alert.mjs');
+      } catch (error) {
+        consoleOut.textContent = String(error.message || error);
+        setStatus('Startup stopped. Report the detail shown below before retrying.', false);
+        started = false;
+      }
+    };
+  </script>
+</body>
+</html>
