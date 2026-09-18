@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# GameZone managed 9.00 startup UI release 2026-09-18
+# GoldHEN 9.00 starter refresh 2026-09-18-v2
 
 about.html
 alert.mjs
@@ -10,6 +10,7 @@ icon0.jpg
 index.html
 lapse.mjs
 LICENSE
+logo.png
 payload.bin
 payload.js
 psfree.mjs
